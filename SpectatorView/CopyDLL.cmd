@@ -14,7 +14,7 @@ Setlocal EnableDelayedExpansion
 
 set /a returnValue=0
 
-if [%~1] NEQ [] (
+if "%~1" NEQ "" (
     call :CopyDLL "%~1"
 )
 
@@ -39,6 +39,7 @@ if %returnValue% NEQ 0 (
     ECHO.
 )
 
+pause
 goto:eof
 
 :CopyDLL
@@ -46,7 +47,7 @@ ECHO.
 ECHO ===================================================
 ECHO Copy DLL's to %~1
 
-IF EXIST %~1\Addons\HolographicCameraRig (
+IF EXIST "%~1\Addons\HolographicCameraRig" (
     REM Copy UnityCompositorInterface
     ECHO.
     ECHO Copy UnityCompositorInterface files:
@@ -91,24 +92,33 @@ IF EXIST %~1\Addons\HolographicCameraRig (
     if !ERRORLEVEL! NEQ 0 ( set /a returnValue += 1 )
     copy /y "%~dp0\Compositor\Release\CompositorDLL.pdb" "%~1\Addons\HolographicCameraRig\Plugins\x86\"
     if !ERRORLEVEL! NEQ 0 ( set /a returnValue += 1 )
-	
     
-	REM Copy CanonSDK
-	REM NOTE: This copy can be removed if not using the Canon SDK
-	ECHO.
+    
+    REM Copy CanonSDK
+    REM NOTE: This copy can be removed if not using the Canon SDK
+    ECHO.
     ECHO ---------------------------------------------------
     ECHO Copy Canon SDK:
-	copy /y "%~dp0\Compositor\x64\Release\EDSDK.dll" "%~1\Addons\HolographicCameraRig\Plugins\x64\"
-    if !ERRORLEVEL! NEQ 0 ( set /a returnValue += 1 )
-	copy /y "%~dp0\Compositor\x64\Release\EdsImage.dll" "%~1\Addons\HolographicCameraRig\Plugins\x64\"
-    if !ERRORLEVEL! NEQ 0 ( set /a returnValue += 1 )
-	
-	copy /y "%~dp0\Compositor\Release\EDSDK.dll" "%~1\Addons\HolographicCameraRig\Plugins\x86\"
-    if !ERRORLEVEL! NEQ 0 ( set /a returnValue += 1 )
-	copy /y "%~dp0\Compositor\Release\EdsImage.dll" "%~1\Addons\HolographicCameraRig\Plugins\x86\"
-    if !ERRORLEVEL! NEQ 0 ( set /a returnValue += 1 )
-	
-	
+    if EXIST "%~dp0\Compositor\x64\Release\EDSDK.dll" (
+        copy /y "%~dp0\Compositor\x64\Release\EDSDK.dll" "%~1\Addons\HolographicCameraRig\Plugins\x64\"
+        if !ERRORLEVEL! NEQ 0 ( set /a returnValue += 1 )
+        copy /y "%~dp0\Compositor\x64\Release\EdsImage.dll" "%~1\Addons\HolographicCameraRig\Plugins\x64\"
+        if !ERRORLEVEL! NEQ 0 ( set /a returnValue += 1 )
+    ) ELSE (
+        ECHO.
+        ECHO x64 Canon DLL does not exist - skipping copy.
+    )
+    if EXIST "%~dp0\Compositor\Release\EDSDK.dll" (
+        copy /y "%~dp0\Compositor\Release\EDSDK.dll" "%~1\Addons\HolographicCameraRig\Plugins\x86\"
+        if !ERRORLEVEL! NEQ 0 ( set /a returnValue += 1 )
+        copy /y "%~dp0\Compositor\Release\EdsImage.dll" "%~1\Addons\HolographicCameraRig\Plugins\x86\"
+        if !ERRORLEVEL! NEQ 0 ( set /a returnValue += 1 )
+    ) ELSE (
+        ECHO.
+        ECHO.
+        ECHO x86 Canon DLL does not exist - skipping copy.
+    )
+    
     REM Copy OpenCV
     REM NOTE: x64 only unless built from source.
     REM NOTE: This copy can be removed if not using an OpenCV frame provider.
@@ -118,10 +128,32 @@ IF EXIST %~1\Addons\HolographicCameraRig (
     copy /y "%~dp0\Compositor\x64\Release\OpenCV*.dll" "%~1\Addons\HolographicCameraRig\Plugins\x64\"
     if !ERRORLEVEL! NEQ 0 ( set /a returnValue += 1 )
     
+    
+    REM Copy GitIgnore
+    ECHO.
+    ECHO ---------------------------------------------------
+    ECHO Copy GitIgnore:
+    copy /y "%~dp0\Compositor\PluginMetaFiles\*" "%~1\Addons\HolographicCameraRig\Plugins\"
+    if !ERRORLEVEL! NEQ 0 ( set /a returnValue += 1 )
+
+
+    REM Copy meta files
+    ECHO.
+    ECHO ---------------------------------------------------
+    ECHO Copy meta files:
+    copy /y "%~dp0\Compositor\PluginMetaFiles\WSA\x64\*.meta" "%~1\Addons\HolographicCameraRig\Plugins\WSA\x64\"
+    if !ERRORLEVEL! NEQ 0 ( set /a returnValue += 1 )
+    copy /y "%~dp0\Compositor\PluginMetaFiles\WSA\x86\*.meta" "%~1\Addons\HolographicCameraRig\Plugins\WSA\x86\"
+    if !ERRORLEVEL! NEQ 0 ( set /a returnValue += 1 )
+    copy /y "%~dp0\Compositor\PluginMetaFiles\x64\*.meta" "%~1\Addons\HolographicCameraRig\Plugins\x64\"
+    if !ERRORLEVEL! NEQ 0 ( set /a returnValue += 1 )
+    copy /y "%~dp0\Compositor\PluginMetaFiles\x86\*.meta" "%~1\Addons\HolographicCameraRig\Plugins\x86\"
+    if !ERRORLEVEL! NEQ 0 ( set /a returnValue += 1 )
+    
 ) ELSE (
     ECHO.
     ECHO "%~1\Addons\HolographicCameraRig" does not exist.
-    if !ERRORLEVEL! NEQ 0 ( set /a returnValue += 1 )
+    set /a returnValue += 1
 )
 
 ECHO ===================================================

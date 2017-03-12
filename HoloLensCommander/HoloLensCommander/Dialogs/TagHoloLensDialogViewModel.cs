@@ -40,7 +40,7 @@ namespace HoloLensCommander
         }
 
         /// <summary>
-        /// Update's the user selected install files data.
+        /// Update's the user selected data.
         /// </summary>
         /// <param name="tagInfo">The information which is to be associated with the HoloLens.</param>
         internal void UpdateUserData(TagInformation tagInfo)
